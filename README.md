@@ -1,17 +1,52 @@
+# Weather ☀️🌧️
 
-# weather
+A modern **Flutter weather app** that provides real-time weather updates and forecasts.  
+Built with **BLoC state management**, **Clean Architecture**, and **get_it** for dependency injection,  
+with offline caching powered by **SharedPreferences**.
 
-A new Flutter project.
+---
 
-## Getting Started
+## 🚀 Getting Started
 
-This project is a starting point for a Flutter application.
+This project demonstrates a scalable Flutter architecture using:
+- **BLoC** for state management  
+- **Clean Architecture** for separation of concerns  
+- **get_it** for dependency injection  
+- **SharedPreferences** for local caching  
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🧱 Project Structure
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+lib/
+├── core/ # Core utilities and error handling
+├── data/ # Models, repositories, and data sources
+├── domain/ # Entities and use cases
+├── presentation/ # UI widgets, pages, and BLoC files
+└── injection_container.dart # Dependency injection setup
+
+
+---
+
+## ⚙️ Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Ahmedanam74/weather.git
+Navigate into the project:
+
+cd weather
+
+
+Install dependencies:
+
+flutter pub get
+
+
+Run the app:
+
+flutter run
+
+
+
+
