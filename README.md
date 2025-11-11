@@ -25,15 +25,15 @@ This project demonstrates a scalable Flutter architecture using:
    
 2. Navigate into the project:
    ```bash
-cd weather
+    cd weather
 
 3. Install dependencies:
    ```bash
-flutter pub get
+   flutter pub get
 
 4.Run the app:
 ```bash
-flutter run
+   flutter run
 
 
 
