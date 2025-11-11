@@ -31,10 +31,9 @@ This project demonstrates a scalable Flutter architecture using:
    ```bash
    flutter pub get
 
-4.Run the app:
+4. Run the app:
 ```bash
    flutter run
-
 
 
 
