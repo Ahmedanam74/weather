@@ -16,35 +16,23 @@ This project demonstrates a scalable Flutter architecture using:
 
 ---
 
-## 🧱 Project Structure
-
-lib/
-├── core/ # Core utilities and error handling
-├── data/ # Models, repositories, and data sources
-├── domain/ # Entities and use cases
-├── presentation/ # UI widgets, pages, and BLoC files
-└── injection_container.dart # Dependency injection setup
-
-
----
 
 ## ⚙️ Installation
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/Ahmedanam74/weather.git
-Navigate into the project:
-
+   
+2. Navigate into the project:
+   ```bash
 cd weather
 
-
-Install dependencies:
-
+3. Install dependencies:
+   ```bash
 flutter pub get
 
-
-Run the app:
-
+4.Run the app:
+```bash
 flutter run
 
 
