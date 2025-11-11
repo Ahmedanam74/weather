@@ -4,7 +4,7 @@
 
 ## 📸 Screenshot  
 
-![Home Page](screenshots/home.png)
+![Home Page](screenshots/photo_2025-11-11_18-29-19.jpg)
 
 
 ---
