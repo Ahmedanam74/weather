@@ -1,0 +1,282 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
+import 'package:weather/injector.dart';
+import 'package:weather/layers/core/constants/app_colors.dart';
+import 'package:weather/layers/core/constants/app_constants.dart';
+import 'package:weather/layers/core/constants/app_svg.dart';
+import 'package:weather/layers/domain/entity/weather_entity.dart';
+import 'package:weather/layers/domain/usecase/get_current_weather_usecase.dart';
+import 'package:weather/layers/presentation/weather/bloc/weather_bloc.dart';
+
+import '../../../core/functions/is_day_function.dart';
+
+class WeatherPage extends StatelessWidget {
+  const WeatherPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final useCase = getIt<GetWeatherUseCase>();
+    return BlocProvider(
+      create: (context) =>
+          WeatherBloc(getWeatherUseCase: useCase)..add(FetchWeatherEvent()),
+      child: WeatherView(),
+    );
+  }
+}
+
+class WeatherView extends StatelessWidget {
+  const WeatherView({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final status = context.select((WeatherBloc b) => b.state.status);
+    if (status == WeatherPageStatus.initial ||
+        status == WeatherPageStatus.loading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    return _Content();
+  }
+}
+
+class _Content extends StatelessWidget {
+  const _Content({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final size = MediaQuery.of(context).size;
+    final weather = context.select((WeatherBloc b) => b.state.weather);
+    final weatherData = weather[0];
+
+    final hourlyData = weatherData.hourly;
+    final hourlyTimes = hourlyData?.time ?? [];
+    final hourlyTemps = hourlyData?.temperature2m ?? [];
+    final hourlyWeatherCodes = hourlyData?.weatherCode ?? [];
+    final weatherIcons = weatherData.current!.isDay == 1
+        ? AppConstants.dayWeatherIcons
+        : AppConstants.nightWeatherIcons;
+    final iconPath =
+        weatherIcons[weatherData.current!.weatherCode] ?? AppSvg.day;
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CurrentWeatherCard(
+                size: size,
+                iconPath: iconPath,
+                weatherData: weatherData,
+                textTheme: textTheme),
+            SizedBox(
+              height: 25,
+            ),
+            Container(
+              width: size.width,
+              height: size.height * .3,
+              decoration: BoxDecoration(
+                  color: AppColors.blueGrey,
+                  borderRadius: BorderRadius.circular(10)),
+              child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(
+                      hourlyTimes.length,
+                      (index) {
+                        return HourlyForecastCard(
+                          time: hourlyTimes[index],
+                          temp: "${hourlyTemps[index].toStringAsFixed(1)}°C",
+                          weatherCode: hourlyWeatherCodes[index],
+                        );
+                      },
+                    ),
+                  )),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CurrentWeatherCard extends StatelessWidget {
+  const CurrentWeatherCard({
+    super.key,
+    required this.size,
+    required this.iconPath,
+    // required this.list,
+
+    required this.textTheme,
+    required this.weatherData,
+  });
+
+  final Size size;
+  final String iconPath;
+  // final List<WeatherEentity> list;
+  final WeatherEentity weatherData;
+  final TextTheme textTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size.width,
+      height: size.height * .36,
+      margin: EdgeInsets.only(top: 50),
+      decoration: BoxDecoration(
+          // color: AppColors.blueGrey,
+          borderRadius: BorderRadius.circular(10)),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              SvgPicture.asset(
+                iconPath,
+                width: 150,
+              ),
+
+              // ),
+              Column(
+                children: [
+                  Text(
+                    "${weatherData.current!.temperature2m} ${weatherData.currentUnits!.temperature2m}",
+                    style: textTheme.displayLarge!.copyWith(
+                        color: AppColors.white, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "Thunderstorm",
+                    style: textTheme.bodyLarge!.copyWith(
+                      color: AppColors.white,
+                    ),
+                  ),
+                  Text(
+                    "Sana'a, Yemen",
+                    style: textTheme.bodyMedium!.copyWith(
+                      color: AppColors.white,
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+          Divider(
+            color: AppColors.white,
+            thickness: 0.2,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              CustomizedColumn(
+                textTheme: textTheme,
+                text:
+                    "${weatherData.current!.windSpeed10m} ${weatherData.currentUnits!.windSpeed10m}",
+                svg: AppSvg.windSpeed,
+                subText: "Wind",
+              ),
+              CustomizedColumn(
+                textTheme: textTheme,
+                text:
+                    "${weatherData.current!.relativeHumidity2m}${weatherData.currentUnits!.relativeHumidity2m}",
+                svg: AppSvg.humidity,
+                subText: "Humidity",
+              ),
+              CustomizedColumn(
+                textTheme: textTheme,
+                text:
+                    "${weatherData.current!.windDirection10m}${weatherData.currentUnits!.windDirection10m}",
+                svg: AppSvg.windDirection,
+                subText: "Wind",
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 50,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CustomizedColumn extends StatelessWidget {
+  const CustomizedColumn({
+    super.key,
+    required this.textTheme,
+    required this.text,
+    required this.svg,
+    required this.subText,
+  });
+
+  final TextTheme textTheme;
+  final String text;
+  final String svg;
+  final String subText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SvgPicture.asset(
+          svg,
+          colorFilter: ColorFilter.mode(AppColors.white, BlendMode.srcIn),
+          width: 30,
+        ),
+        Text(
+          text,
+          style: textTheme.bodyMedium!.copyWith(color: AppColors.white),
+        ),
+        Text(
+          subText,
+          style: textTheme.bodySmall!
+              .copyWith(color: AppColors.white, fontWeight: FontWeight.w300),
+        ),
+      ],
+    );
+  }
+}
+
+class HourlyForecastCard extends StatelessWidget {
+  const HourlyForecastCard({
+    super.key,
+    required this.time,
+    required this.temp,
+    required this.weatherCode,
+  });
+  final String time;
+  final String temp;
+  final int weatherCode;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateTime = DateTime.parse(time);
+    final isDay = isDayTime(dateTime);
+    final iconPath = isDay
+        ? AppConstants.dayWeatherIcons[weatherCode] ?? AppSvg.day
+        : AppConstants.nightWeatherIcons[weatherCode] ?? AppSvg.night;
+
+    return Container(
+      width: 80,
+      margin: EdgeInsets.symmetric(horizontal: 8),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.asset(iconPath),
+          SizedBox(height: 5),
+          Text(
+            DateFormat.j().format(dateTime),
+            style: TextStyle(color: Colors.white, fontSize: 14),
+          ),
+          SizedBox(height: 5),
+          Text(
+            temp,
+            style: TextStyle(
+                color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}

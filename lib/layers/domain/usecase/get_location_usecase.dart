@@ -1,0 +1,3 @@
+class GetLocationUseCase{
+  
+}
